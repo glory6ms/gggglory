@@ -1,0 +1,171 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>map</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.0.0/css/bootstrap.css}">
+<!--    <link href="https://cdn.bootcdn.net/ajax/libs/openlayers/4.6.5/ol.css" rel="stylesheet">-->
+<!--    <link rel="stylesheet" th:href="@{/asserts/css/mapcommen.css}">-->
+<!--    <link rel="stylesheet" th:href="@{/asserts/css/ol6.css}">-->
+
+    <style>
+        html, body {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #leftcard {
+            position: absolute;
+            right: 5px;
+            top: 7%;
+            width: 20%;
+            height: auto;
+            float: right;
+            display: block;
+        }
+
+        #map_container {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        #foot_table{
+            position: absolute;
+            bottom: 1px;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            z-index: 999;
+            text-align: center;
+            background-color: whitesmoke;
+            height: 20%;
+        }
+        #map{
+            box-shadow: 0px -2px 0px 0px #94c8e0, /*上边阴影  红色*/
+            -3px 0px 0px 0px #94c8e0, /*左边阴影  绿色*/
+            3px 0px 0px 0px #94c8e0, /*右边阴影  蓝色*/
+            0px 2px 0px 0px #94c8e0;
+            width: 85%;
+            margin: auto;
+        }
+        /*
+        position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 999;
+  text-align: center;
+  */
+
+        .box {
+            position: absolute;
+            background: #fa0;
+            border-radius: 10px;
+            /*z-index: 10;*/
+            /*left: 0;*/
+            /*right: 0;*/
+            top: 10px;
+            float-displace: auto;
+            margin:0 auto;
+            opacity: 0.9;
+            /*margin-left: auto;*/
+            /*margin-right: auto;*/
+            z-index: 999;
+            text-align: center;
+        }
+
+        .box.is-pointer-down {
+            background: #09F;
+        }
+        .box.is-dragging { opacity:0.4; }
+        .box-1{
+            width:  auto;
+            height: auto;
+            display: block;
+        }
+        .handle {
+            background: #555;
+            background: hsla(0, 0%, 0%, 0.4);
+            width: 100px;
+            height: 10px;
+            border-radius: 5px;
+        }
+        .handle:hover{cursor: grab;}
+        a:hover{cursor: pointer}
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://api.map.baidu.com/res/webgl/10/bmap.css">
+    <script src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=3YgkyTNz56vyd64yrQc6BPtZnGamdTNP"></script>
+    <script src="https://mapv.baidu.com/gl/examples/static/mapv.min.js"></script>
+    <script src="https://mapv.baidu.com/gl/examples/static/common.js"></script>
+    <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.58/dist/mapvgl.min.js"></script>
+
+</head>
+<body>
+<div class="container-fluid">
+    <div id="map_container"></div>
+<!--    <div id="leftcard" style="border-color:#007bff;">-->
+        <!--       地图 -->
+
+        <!--        左侧拖动栏-->
+        <div class="box box-1" id="draggable1" >
+            <div class="handle"></div>
+            <div class="total-centered">
+
+<!--                <a th:onclick="display()" >播放</a>-->
+
+                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                    <div class="btn-group mr-2" role="group" aria-label="First group">
+                        <button type="button" class="btn btn-secondary" th:onclick="draw(1)">波高1</button>
+                        <button type="button" class="btn btn-secondary" th:onclick="draw(2)">波高2</button>
+                        <button type="button" class="btn btn-secondary" th:onclick="draw(3)">波高3</button>
+                        <button type="button" class="btn btn-secondary" th:onclick="draw(4)">波高4</button>
+                        <button type="button" class="btn btn-secondary" th:onclick="draw(5)">波高5</button>
+                        <button type="button" class="btn btn-secondary" th:onclick="draw(6)">波高6</button>
+                        <button type="button" class="btn btn-secondary" th:onclick="draw(7)">波高7</button>
+                        <button type="button" class="btn btn-secondary" th:onclick="draw(8)">波高8</button>
+                        <button type="button" class="btn btn-secondary" th:onclick="draw(9)">波高9</button>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+<div class="row pre-scrollable" id="foot_table">
+    <table class="table table-striped table-sm">
+        <thead class="bg-light">
+        <tr class="border-0">
+            <th class="border-0">id <label id="bh"></label></th>
+            <th class="border-0">经度</th>
+            <th class="border-0">纬度</th>
+        </tr>
+        </thead>
+        <tbody id="route">
+
+        </tbody>
+
+    </table>
+</div>
+<script th:src="@{/webjars/jquery/3.3.1/jquery.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.0.0/js/bootstrap.js}"></script>
+<!--<script th:src="@{/asserts/js/ol.js}"></script>-->
+<!--<script th:src="@{/asserts/js/ol2.js}"></script>-->
+<!--<script src="https://cdn.bootcdn.net/ajax/libs/openlayers/4.6.5/ol.js"></script>-->
+<!--<script th:src="@{/asserts/js/ol6.js}"></script>-->
+<script src="https://cdn.bootcdn.net/ajax/libs/draggabilly/2.2.0/draggabilly.pkgd.min.js"></script>
+<script th:src="@{/asserts/js/bd.js}"></script>
+</body>
+</html>

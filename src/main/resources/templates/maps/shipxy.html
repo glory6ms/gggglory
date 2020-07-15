@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>轨迹查询</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.0.0/css/bootstrap.css}">
+    <link rel="stylesheet" th:href="@{/asserts/css/ol.css}" type="text/css">
+    <style>
+        #map{
+            height: 90%;
+        }
+        body{
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+
+                <div id="map"
+                     style="box-shadow: 0px -2px 0px 0px #94c8e0, /*上边阴影  红色*/
+              					  							 -3px 0px 0px 0px #94c8e0, /*左边阴影  绿色*/
+                											 3px 0px 0px 0px #94c8e0, /*右边阴影  蓝色*/
+                											 0px 2px 0px 0px #94c8e0;">
+                </div>
+</div>
+<script th:src="@{/webjars/jquery/3.3.1/jquery.js}"></script>
+<script th:src="@{/asserts/js/ol.js}"></script>
+<script th:src="@{/asserts/js/ol2.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ol3-echarts/dist/ol3Echarts.js"></script>
+<!--<script th:src="@{/asserts/js/indexMap.js}"></script>-->
+<script th:src="@{/webjars/bootstrap/4.0.0/js/bootstrap.js}"></script>
+<script>
+    //画断面图层
+    const source1 = new ol.source.Vector({wrapX: false});
+    //绘图绘在此矢量图层 画断面的图层，在图上画线
+    const vector1 = new ol.layer.Vector({
+        source: source1,
+        style: new ol.style.Style({ //修改绘制的样式
+            fill: new ol.style.Fill({
+                color: 'rgba(255, 255, 255, 0.2)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#ffcc33',
+                width: 2
+            }),
+            image: new ol.style.Circle({
+                radius: 7,
+                fill: new ol.style.Fill({
+                    color: '#ffcc33'
+                })
+            })
+        })
+    });
+    //高德地图层
+    const gaodeMapLayer = new ol.layer.Tile(
+        {
+            source: new ol.source.XYZ(
+                {
+                    url: 'http://webst0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}'
+                })
+        });
+
+    const layer = new ol.layer.Vector({
+        source: new ol.source.Vector()
+    });
+
+    // 实例化鼠标位置控件
+    // const mousePositionControl = new ol.control.MousePosition({
+    //     coordinateFormat: function (coord) {
+    //         return ol.coordinate.toStringHDMS(coord);
+    //     }, //坐标格式
+    //     projection: 'EPSG:4326', //地图投影坐标系
+    //     className: 'custom-mouse-position', //坐标信息显示样式
+    //     // 显示鼠标位置信息的目标容器
+    //     target: document.getElementById('mouse-position'),
+    //     undefinedHTML: '&nbsp' //未定义坐标的标记
+    // });
+    let mousePositionControl = new ol.control.MousePosition({
+        coordinateFormat: ol.coordinate.createStringXY(4), //坐标格式
+        projection: 'EPSG:4326', //地图投影坐标系
+        className: 'custom-mouse-position', //坐标信息显示样式
+        // 显示鼠标位置信息的目标容器
+        target: document.getElementById('mouse-position'),
+        undefinedHTML: '&nbsp' //未定义坐标的标记
+    });
+    // // 地图投影
+    var projection = ol.proj.get('EPSG:4326');
+    // // 瓦片地址
+    // var tileUrl = "http://www.cjienc.com/arcgis/rest/services/cjinobeacon2/MapServer/tile/{z}/{y}/{x}?token=mmPANHmiGllbw-XOk9LEsgJiUKWfCHpa4igDEoOWin0Z9WR4-4rri_on8Vp2zVb8rdXrt78Y8ndbj485BRujdA..";
+    // // 原点
+    // var tileUrl1 = "http://www.cjienc.com/arcgis/rest/services/basemap84/MapServer/tile/{z}/{y}/{x}?token=mmPANHmiGllbw-XOk9LEsgJiUKWfCHpa4igDEoOWin0Z9WR4-4rri_on8Vp2zVb8rdXrt78Y8ndbj485BRujdA.."
+    // var origin = [-400.0, 400.0];
+    // // 分辨率
+    var resolutions1 = [0.023794610058302804, 0.00951784402332112,
+        0.00475892201166056, 0.00237946100583028, 0.00118973050291514,
+        0.00059486525145757, 0.000297432625728785,
+        0.0001487163128643925, 0.00007435815643219625,
+        0.000037179078216098126, 0.00001859072883855198,
+        0.000009294174688773075, 0.000004647087344386537,
+        0.00000237946100583028]
+    // // 地图范围
+    // var fullExtent = [103.87588002846373, 18.45228966609097,
+    //     126.40686460052386, 42.24664597260153];
+    // var tileGrid = new ol.tilegrid.TileGrid({
+    //     tileSize: 256,
+    //     origin: origin,
+    //     extent: fullExtent,
+    //     resolutions: resolutions
+    // });
+    // // 瓦片数据源
+    // var tileArcGISXYZ = new ol.source.XYZ({
+    //     tileGrid: tileGrid,
+    //     projection: projection,
+    //     url: tileUrl,
+    // });
+    // var tileArcGISXYZ1 = new ol.source.XYZ({
+    //     tileGrid: tileGrid,
+    //     projection: projection,
+    //     url: tileUrl1,
+    // });
+
+    var openSeaMapLayer = new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            opaque: false,
+            url: 'https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png'
+        })
+    });
+
+
+    // 自定义分辨率和瓦片坐标系
+    var resolutions = [];
+    var maxZoom = 18;
+
+    // 计算使用的分辨率
+    // for(var i=0; i<=maxZoom; i++){
+    //     resolutions[i] = Math.pow(2, maxZoom-i);
+    // }
+    var tilegrid  = new ol.tilegrid.TileGrid({
+        origin: ol.proj.transform([0,0.201], 'EPSG:4326', 'EPSG:3857'),    // 设置原点坐标
+        resolutions:  [
+            156543.03392804097,
+            78271.51696402048,
+            39135.75848201024,
+            19567.87924100512,
+            9783.93962050256,
+            4891.96981025128,
+            2445.98490512564,
+            1222.99245256282,
+            611.49622628141,
+            305.748113140705,
+            152.8740565703525,
+            76.43702828517625,
+            38.21851414258813,
+            19.109257071294063,
+            9.554628535647032,
+            4.777314267823516,
+            2.388657133911758
+        ]   // 设置分辨率
+        // extent: ol.proj.transformExtent([-180.0, -90.0, 180.0, 90.0], 'EPSG:4326', 'EPSG:3857'),//范围
+    });
+
+    // 创建海图地图的数据源
+    var shipxySource = new ol.source.TileImage({
+        projection: 'EPSG:3857',
+        tileGrid: tilegrid,
+        tileUrlFunction: function(tileCoord, pixelRatio, proj){
+            var z = tileCoord[0];
+            var x = tileCoord[1];
+            var y = tileCoord[2];
+
+            if(Math.abs(x)>Math.pow(2,z)/2){
+                return;
+            }
+            x= x+Math.pow(2,z)/2;
+            //起点
+            var flag = Math.pow(2,z)/2-1;
+            if(y<=flag){
+                y = flag-y;
+            }else{
+                return;
+            }
+            var tmp = (8-2)*Math.pow(2,z-3)+2+Math.pow(2,z-3)-1;
+            //上边界：距离flag处z-3的i次方减一。下边界：距离上边界处6的z-3次方加2，所以下边界距离flag处为Math.pow(2,z-3)-1+6*Math.pow(2,z-3)+3
+            if(y<Math.pow(2,z-3)-1||y>=tmp){
+                return;
+            }
+            return "http://m12.shipxy.com/tile.c?l=Na&m=o&x="+x+"&y="+y+"&z="+z+"";
+        }
+    });
+
+    var shipxyLayer = new ol.layer.Tile({
+        projection: 'EPSG:3857',
+        source: shipxySource
+        // ,wrapX: false
+    });
+    const map = new ol.Map({
+        target: 'map',
+        layers: [shipxyLayer
+            , openSeaMapLayer
+            , vector1
+            // , new ol.layer.Tile({
+            //     source: new ol.source.TileDebug({
+            //         projection: 'EPSG:3857',
+            //         tileGrid: shipxySource.getTileGrid()
+            //     })
+            // })
+        ],
+        view: new ol.View({
+            projection: 'EPSG:4326',
+            center: [114.3872997,30.6695992],
+            zoom: 5,
+            maxZoom: 16,
+            minZoom: 2
+            // extent: fullExtent
+        }),
+        controls: ol.control.defaults({attribution: false, zoom: false, rotate: false}).extend([mousePositionControl])
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>船舶信息</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.0.0/css/bootstrap.css}">
+    <script th:src="@{/webjars/jquery/3.3.1/jquery.js}"></script>
+</head>
+<body>
+<div class="row">
+    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+        <div class="page-header">
+            <h2 class="pageheader-title">统计结果 </h2>
+            <div class="page-breadcrumb">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a style="color: #0a40d8d6;"
+                                                       href="javascript:window.opener=null;window.open('','_self');window.close();"
+                                                       class="breadcrumb-link">查询主界面</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">统计结果</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="background-color:#E9ECF1;">
+    <span id="select_mmsi" class="label">mmsi号选择</span>
+    <div class="row">
+        <div class="col-xl-7 col-lg-12 col-md-6 col-sm-12 col-12">
+            <div class="card">
+                <!--                            <h5 class="card-header">断面流量统计</h5>-->
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">MMSI</th>
+                                <th scope="col">船名</th>
+                                <th scope="col">船长</th>
+                                <th scope="col">船宽</th>
+                                <th scope="col">吃水</th>
+                                <th scope="col">目的地</th>
+                                <th scope="col">船舶类型</th>
+                            </tr>
+                            </thead>
+                            <tbody id="content">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-5 col-lg-12 col-md-6 col-sm-12 col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div id="shipspeed" style="width: 500px;height:400px;"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- ============================================================== -->
+        <!-- product category  -->
+        <!-- ============================================================== -->
+        <div class="col-xl-12 col-lg-6 col-md-6 col-sm-12 col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+</body>
+<script th:src="@{/webjars/bootstrap/4.0.0/js/bootstrap.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/hmap-js/dist/hmap.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ol3-echarts/dist/ol3Echarts.js"></script>
+<script th:src="@{/asserts/js/shipDetail.js}"></script>
+</html>

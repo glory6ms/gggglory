@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>断面统计结果</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.0.0/css/bootstrap.css}">
+    <link rel="stylesheet" th:href="@{/asserts/css/style.css}">
+    <script th:src="@{/webjars/jquery/3.3.1/jquery.js}"></script>
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+    <div class="dashboard-ecommerce">
+        <div class="container-fluid dashboard-content ">
+            <!-- ============================================================== -->
+            <!-- pageheader  -->
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                    <div class="page-header">
+                        <h2 class="pageheader-title">统计结果 </h2>
+                        <div class="page-breadcrumb">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a style="color: #0a40d8d6;"
+                                                                   href="javascript:window.opener=null;window.open('','_self');window.close();"
+                                                                   class="breadcrumb-link">查询主界面</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">统计结果</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================== -->
+            <div class="row">
+                <div class="col-xl-5 col-lg-12 col-md-6 col-sm-12 col-12">
+                    <div class="card">
+                        <!--                            <h5 class="card-header">断面流量统计</h5>-->
+                        <div class="card-body p-0">
+                            <div id="shipstate" style="height:400px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-7 col-lg-12 col-md-6 col-sm-12 col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="shipspeed" style="width: 800px;height:400px;"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ============================================================== -->
+        <!-- end customer acquistion  -->
+        <!-- ============================================================== -->
+    </div>
+
+    <div class="ecommerce-widget">
+        <div class="row">
+            <div class="col-xl-6 col-lg-12 col-md-6 col-sm-12 col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="shiptype" style="width: 500px;height:400px;">加载中</div>
+                    </div>
+
+                </div>
+            </div>
+    </div>
+    <script>
+
+
+    </script>
+    <div style="background-color:#E9ECF1;">
+        <div>
+            <div class="form-group" style="width: 15%;flex: auto;margin: 0 auto;">
+                <span id="select_mmsi" class="label">mmsi号选择</span>
+                <!--提交的是部门的id-->
+                <select class="form-control" name="mmsi" id="mmsi">
+                    <!--                <option  th:value="${MMSI.mmsi}" th:each="MMSI:${MMSI}" th:text="${MMSI.mmsi}">1</option>-->
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <!-- ============================================================== -->
+            <!-- product category  -->
+            <!-- ============================================================== -->
+            <div class="col-xl-12 col-lg-6 col-md-6 col-sm-12 col-12">
+                <div class="card">
+                    <!--                    <h5 class="card-header"> 轨迹点经纬度路径图</h5>-->
+                    <div class="card-body">
+                        <div id="shiptrack" style="height: 300px;width: auto;"></div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- ============================================================== -->
+            <!-- product category  -->
+            <!-- ============================================================== -->
+            <div class="col-xl-12 col-lg-9 col-md-6 col-sm-12 col-12">
+                <div class="card">
+                    <!--                <h5 class="card-header"> 航行路程图（速度-时间）</h5>-->
+                    <div class="card-body">
+                        <div id="speeds" style="width: auto;height: 300px"></div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- ============================================================== -->
+            <!-- product category  -->
+            <!-- ============================================================== -->
+            <div class="col-xl-12 col-lg-6 col-md-6 col-sm-12 col-12" hidden="true">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="land" style="width: auto;height: 300px"></div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- ============================================================== -->
+            <!-- product category  -->
+            <!-- ============================================================== -->
+            <div class="col-xl-12 col-lg-6 col-md-6 col-sm-12 col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="map"></div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- end product category  -->
+    <!-- product sales  -->
+    <!-- ============================================================== -->
+
+    <!-- ============================================================== -->
+    <!-- end social source  -->
+    <!-- ============================================================== -->
+</div>
+
+<!-- ============================================================== -->
+<!-- end sales traffice country source  -->
+<!-- ============================================================== -->
+</div>
+</div>
+</div>
+</div>
+</div>
+<script th:src="@{/webjars/bootstrap/4.0.0/js/bootstrap.js}"></script>
+<script th:src="@{/asserts/js/echarts.min.js}"></script>
+<script th:src="@{/asserts/js/macarons.js}"></script>
+<script th:src="@{/asserts/js/ecStat.js}"></script>
+<!--<script th:src="@{/asserts/js/data-table/datatables.min.js}"></script>-->
+<!--<script th:src="@{/asserts/js/data-table/dataTables.buttons.min.js}"></script>-->
+<!--<script th:src="@{/asserts/js/data-table/buttons.flash.min.js}"></script>-->
+<!--<script th:src="@{/asserts/js/data-table/jszip.min.js}"></script>-->
+<!--<script th:src="@{/asserts/js/data-table/pdfmake.min.js}"></script>-->
+<!--<script th:src="@{/asserts/js/data-table/vfs_fonts.js}"></script>-->
+<!--<script th:src="@{/asserts/js/data-table/buttons.html5.min.js}"></script>-->
+<!--<script th:src="@{/asserts/js/data-table/buttons.print.min.js}"></script>-->
+<!--<script th:src="@{/asserts/js/data-table/datatables-init.js}"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/hmap-js/dist/hmap.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ol3-echarts/dist/ol3Echarts.js"></script>
+<script th:src="@{/asserts/js/tracklist.js}"></script>
+<script>
+</script>
+
+</body>
+</html>

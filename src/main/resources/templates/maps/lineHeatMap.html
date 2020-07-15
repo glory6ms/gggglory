@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>轨迹查询</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.0.0/css/bootstrap.css}">
+    <link rel="stylesheet" th:href="@{/asserts/css/ol.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/asserts/css/mapcommen.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/asserts/css/bootstrap-datepicker3.css}">
+</head>
+<body>
+<div class="container-fluid">
+    <ul class="nav justify-content-end" style="background-color: #47a3da;" id="top_nav">
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/ships}" style="color: whitesmoke">船位</a>
+        </li>
+        <li class="nav-item" style="background-color: #b3eff599;color: dimgrey">
+            <a class="nav-link" onclick="showQuery()">轨迹</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/flowGL}" style="color: whitesmoke">流场图</a>
+        </li>
+    </ul>
+
+    <div class="card" id="leftcard" style="border-color:#007bff;">
+        <div class="card-header">
+
+            <h5 id="tip">按时间段查询船舶轨迹（航行信息）</h5>
+            <!--        <div id="tip" style="margin: 0 auto;display: none;">-->
+            <!--        <span id="msg_track">禁止平移与缩放</span>-->
+            <!--        </div>-->
+        </div>
+        <div class="card-body">
+            <div class="panel-body">
+                <div id="map"
+                     style="box-shadow: 0px -2px 0px 0px #94c8e0, /*上边阴影  红色*/
+              					  							 -3px 0px 0px 0px #94c8e0, /*左边阴影  绿色*/
+                											 3px 0px 0px 0px #94c8e0, /*右边阴影  蓝色*/
+                											 0px 2px 0px 0px #94c8e0;">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card" id="rightcard" style="height: auto;">
+
+        <div class="card-body" id="card_body">
+            <div class="row">
+                <div class="col-8"><h5 class="card-title">查询框</h5></div>
+                <div class="col-4">
+                    <button type="button" class="close" aria-label="Close" style="float:right;" onclick="hid(1)">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div class="basic-elements">
+
+                    <form autocomplete="off">
+                        <div class="form-shadow">
+                            <span id="titlemessage" class="badge badge-light">请选择查询时间段：(2018年1月内)</span>
+                            <div class="container">
+                                <div class="row align-items-start">
+                                    <div class="col">
+                                        <div class="input-group date datepicker">
+                                            <input type="text" class="form-control" id="timein"
+                                                   name="timein" th:placeholder="开始时间">
+                                            <div class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th "></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="input-group date datepicker">
+                                            <input type="text" class="form-control" id="timeout"
+                                                   name="timeout" th:placeholder="结束时间">
+                                            <div class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th "></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center">
+
+                                <a id="ajaxQuery" class="btn btn-primary" style="width: 45%;color: white;"
+                                   th:text="船舶查询"></a>
+
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="form-shadow"><!--
+                        <label class="text-info">请设置统计断面：</label>-->
+                    <span class="badge badge-light">请设置统计断面：</span>
+                    <form>
+                        <div class="container" align="center">
+                            <div class="form-shadow">
+                                <span class="badge badge-info" th:text="起点"></span>
+                                <div class="row align-items-center">
+
+                                    <div class="col">
+                                        <input type="text" class="form-control" th:placeholder="开始经度"
+                                               id="lng1" name="lng1">
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" th:placeholder="开始纬度"
+                                               id="lat1" name="lat1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div th:class="form-shadow">
+                                <span class="badge badge-info" th:text="终点"></span>
+                                <div class="row justify-content-center">
+                                    <div class="col">
+                                        <input type="text" class="form-control" th:placeholder="结束经度"
+                                               aria-describedby="sizing-addon3" id="lng2" name="lng2">
+
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" th:placeholder="结束纬度"
+                                               aria-describedby="sizing-addon3" id="lat2" name="lat2">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button id="drawline" type="button" class="btn btn-primary"
+                                    style="width: fit-content;border-bottom-left-radius: 2px;"
+                                    th:text="绘制断面"></button>
+                            <button id="endDrawFBtn" type="button" class="btn btn-success"
+                                    style="width: fit-content;border-bottom-left-radius: 2px"
+                                    th:text="结束绘制"></button>
+                            <button id="SectionSearch" type="button" class="btn btn-primary"
+                                    style="width: fit-content"
+                                    th:text="断面统计"></button>
+                            <!--使用提示框告诉用户查看统计结果-->
+                        </div>
+                    </form>
+                </div>
+                <br>
+                <div class="form-shadow">
+                    <span class="badge badge-light">请绘制截面：</span>
+                    <textarea hidden="true" id="areaData" cols="60" rows="4"></textarea>
+                    <div class="btn-group btn-group-sm">
+                        <button id="starDrawFBtn" class="btn btn-info">绘制截面</button>
+                        <button id="endDraw" type="button" class="btn btn-success"
+                                style="width: fit-content;border-bottom-left-radius: 2px" th:text="结束绘制"></button>
+                        <button id="Section" class="btn btn-info" style="width: fit-content"
+                                th:text="截面统计"></button>
+                        <!--使用提示框告诉用户查看统计结果-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="spinner" id="spinner" style="display: none;">
+
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+            <div class="rect4"></div>
+            <div class="rect5"></div>
+        </div>
+    </div>
+</div>
+</div>
+<script th:src="@{/webjars/jquery/3.3.1/jquery.js}"></script>
+<script th:src="@{/asserts/js/ol.js}"></script>
+<script th:src="@{/asserts/js/ol2.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ol3-echarts/dist/ol3Echarts.js"></script>
+<script th:src="@{/asserts/js/indexMap.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.0.0/js/bootstrap.js}"></script>
+<script th:src="@{/asserts/js/draggabilly.pkgd.min.js}"></script>
+<script th:src="@{/asserts/js/modernizr.custom.js}"></script>
+<script th:src="@{/asserts/js/bootstrap-datepicker.min.js}"></script>
+<script th:src="@{/asserts/js/bootstrap-datepicker.zh-CN.min.js}"></script>
+<script th:src="@{/asserts/js/ajax.js}"></script>
+<!--<script>-->
+<!--    //画断面图层-->
+<!--    const source1 = new ol.source.Vector({wrapX: false});-->
+<!--    //绘图绘在此矢量图层 画断面的图层，在图上画线-->
+<!--    const vector1 = new ol.layer.Vector({-->
+<!--        source: source1,-->
+<!--        style: new ol.style.Style({ //修改绘制的样式-->
+<!--            fill: new ol.style.Fill({-->
+<!--                color: 'rgba(255, 255, 255, 0.2)'-->
+<!--            }),-->
+<!--            stroke: new ol.style.Stroke({-->
+<!--                color: '#ffcc33',-->
+<!--                width: 2-->
+<!--            }),-->
+<!--            image: new ol.style.Circle({-->
+<!--                radius: 7,-->
+<!--                fill: new ol.style.Fill({-->
+<!--                    color: '#ffcc33'-->
+<!--                })-->
+<!--            })-->
+<!--        })-->
+<!--    });-->
+<!--    //高德地图层-->
+<!--    const gaodeMapLayer = new ol.layer.Tile(-->
+<!--        {-->
+<!--            source: new ol.source.XYZ(-->
+<!--                {-->
+<!--                    url: 'http://webst0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}'-->
+<!--                })-->
+<!--        });-->
+<!--    // google地图层-->
+<!--    var googleMapLayer = new ol.layer.Tile({-->
+<!--        source: new ol.source.XYZ({-->
+<!--            url:'http://www.google.cn/maps/vt/pb=!1m4!1m3!1i{z}!2i{x}!3i{y}!2m3!1e0!2sm!3i345013117!3m8!2szh-CN!3scn!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0'-->
+<!--        })-->
+<!--    });-->
+
+<!--    const layer = new ol.layer.Vector({-->
+<!--        source: new ol.source.Vector()-->
+<!--    });-->
+
+<!--    // 实例化鼠标位置控件-->
+<!--    const mousePositionControl = new ol.control.MousePosition({-->
+<!--        coordinateFormat: function (coord) {-->
+<!--            return ol.coordinate.toStringHDMS(coord);-->
+<!--        }, //坐标格式-->
+<!--        projection: 'EPSG:4326', //地图投影坐标系-->
+<!--        className: 'custom-mouse-position', //坐标信息显示样式-->
+<!--        // 显示鼠标位置信息的目标容器-->
+<!--        target: document.getElementById('mouse-position'),-->
+<!--        undefinedHTML: '&nbsp' //未定义坐标的标记-->
+<!--    });-->
+<!--    // 地图投影-->
+<!--    var projection = ol.proj.get('EPSG:4326');-->
+<!--    // 瓦片地址-->
+<!--    var tileUrl = "http://www.cjienc.com/arcgis/rest/services/cjinobeacon2/MapServer/tile/{z}/{y}/{x}?token=mmPANHmiGllbw-XOk9LEsgJiUKWfCHpa4igDEoOWin0Z9WR4-4rri_on8Vp2zVb8rdXrt78Y8ndbj485BRujdA..";-->
+<!--    // 原点-->
+<!--    var tileUrl1 = "http://www.cjienc.com/arcgis/rest/services/basemap84/MapServer/tile/{z}/{y}/{x}?token=mmPANHmiGllbw-XOk9LEsgJiUKWfCHpa4igDEoOWin0Z9WR4-4rri_on8Vp2zVb8rdXrt78Y8ndbj485BRujdA.."-->
+<!--    var origin = [-400.0, 400.0];-->
+<!--    // 分辨率-->
+<!--    var resolutions = [0.023794610058302804, 0.00951784402332112,-->
+<!--        0.00475892201166056, 0.00237946100583028, 0.00118973050291514,-->
+<!--        0.00059486525145757, 0.000297432625728785,-->
+<!--        0.0001487163128643925, 0.00007435815643219625,-->
+<!--        0.000037179078216098126, 0.00001859072883855198,-->
+<!--        0.000009294174688773075, 0.000004647087344386537,-->
+<!--        0.00000237946100583028]-->
+<!--    // 地图范围-->
+<!--    var fullExtent = [103.87588002846373, 18.45228966609097,-->
+<!--        126.40686460052386, 42.24664597260153];-->
+<!--    var tileGrid = new ol.tilegrid.TileGrid({-->
+<!--        tileSize: 256,-->
+<!--        origin: origin,-->
+<!--        extent: fullExtent,-->
+<!--        resolutions: resolutions-->
+<!--    });-->
+<!--    // 瓦片数据源-->
+<!--    var tileArcGISXYZ = new ol.source.XYZ({-->
+<!--        tileGrid: tileGrid,-->
+<!--        projection: projection,-->
+<!--        url: tileUrl,-->
+<!--    });-->
+<!--    var tileArcGISXYZ1 = new ol.source.XYZ({-->
+<!--        tileGrid: tileGrid,-->
+<!--        projection: projection,-->
+<!--        url: tileUrl1,-->
+<!--    });-->
+<!--    const map = new ol.Map({-->
+<!--        target: 'map',-->
+<!--        layers: [googleMapLayer,-->
+<!--             vector1-->
+
+<!--        ],-->
+<!--        view: new ol.View({-->
+<!--            center: [122, 29],-->
+<!--            resolutions: resolutions,-->
+<!--            projection: projection,-->
+<!--            extent: fullExtent-->
+<!--        }),-->
+<!--        controls: ol.control.defaults({attribution: false, zoom: false, rotate: false}).extend([mousePositionControl])-->
+<!--    });-->
+<!--    map.getView().setZoom(1);-->
+<!--    //弹框显示地理信息-->
+<!--    let count = 1;-->
+<!--    let clickflag=0;-->
+<!--    map.on('singleclick', function (evt) {-->
+<!--        if(clickflag==1) {-->
+<!--            if (count % 2 == 0) {-->
+<!--                document.getElementById("lng2").value = evt.coordinate[0].toFixed(6);-->
+<!--                document.getElementById("lat2").value = evt.coordinate[1].toFixed(6);-->
+<!--                //此处需要判断绘制的断面是否在所查询的区域内-->
+<!--                // if(evt.coordinate[0].toFixed(6)<border_x1)-->
+<!--                $("#lat1").css("background-color","white");-->
+<!--                $("#lng1").css("background-color","white");-->
+<!--                $("#lat2").css("background-color","yellow");-->
+<!--                $("#lng2").css("background-color","yellow");-->
+<!--            } else {-->
+<!--                document.getElementById("lng1").value = evt.coordinate[0].toFixed(6);-->
+<!--                document.getElementById("lat1").value = evt.coordinate[1].toFixed(6);-->
+<!--                $("#lat2").css("background-color","white");-->
+<!--                $("#lng2").css("background-color","white");-->
+<!--                $("#lat1").css("background-color","yellow");-->
+<!--                $("#lng1").css("background-color","yellow");-->
+<!--            }-->
+<!--            count = count + 1;-->
+<!--        }-->
+
+<!--    });-->
+
+<!--    //画直线-->
+<!--    /* 自定义工具 */-->
+<!--    let draw1, select, modify;-->
+<!--    let lflag = 0;-->
+<!--    $('#drawline').click(function () {-->
+<!--        map.removeInteraction(lineDraw);-->
+<!--        clickflag=1;-->
+<!--        map.removeInteraction(draw1); //点击选择时候  取消绘图交互-->
+<!--        draw1 = new ol.interaction.Draw({-->
+<!--            source: source1,-->
+<!--            type: 'LineString',-->
+<!--            maxPoints: 2-->
+<!--        });-->
+<!--        draw1.on('drawstart', function(){-->
+<!--            source1.clear();-->
+<!--        });-->
+<!--        if (lflag=0){-->
+<!--            map.addLayer()-->
+<!--        }-->
+<!--        map.addInteraction(draw1); //增加的交互-->
+<!--    });-->
+<!--    //结束绘制按钮-->
+<!--    let endDrawFBtn = document.getElementById('endDrawFBtn');-->
+<!--    endDrawFBtn.onclick = function () {-->
+<!--        clickflag=0;-->
+<!--        map.removeInteraction(draw1); //点击选择时候  取消绘图交互-->
+<!--        $("#lat2").css("background-color","white");-->
+<!--        $("#lng2").css("background-color","white");-->
+<!--        $("#lat1").css("background-color","white");-->
+<!--        $("#lng1").css("background-color","white");-->
+<!--    };-->
+
+<!--    //-->
+<!--    let geometryfunction;-->
+<!--    geometryfunction = function(coordinates, geometry){-->
+<!--        if(!geometry){-->
+<!--            geometry = new ol.geom.Polygon(null);       //多边形-->
+<!--        }-->
+<!--        let start = coordinates[0];-->
+<!--        let end = coordinates[1];-->
+<!--        geometry.setCoordinates([-->
+<!--            [-->
+<!--                start,-->
+<!--                [start[0], end[1]],-->
+<!--                end,-->
+<!--                [end[0], start[1]],-->
+<!--                start-->
+<!--            ]-->
+<!--        ]);-->
+<!--        return geometry;-->
+<!--    };-->
+<!--    let lineDraw;-->
+<!--    //添加交互&#45;&#45;&#45;&#45;绘制截面feature-->
+<!--    function addInteractions(source) {-->
+<!--        clickflag=1;-->
+<!--        lineDraw = new ol.interaction.Draw({-->
+<!--            type: 'LineString',-->
+<!--            geometryFunction: geometryfunction,-->
+<!--            source: source,    // 注意设置source，这样绘制好的线，就会添加到这个source里-->
+<!--            maxPoints: 2-->
+<!--        });-->
+<!--        lineDraw.on('drawstart', function(){-->
+<!--            source1.clear();-->
+<!--        });-->
+<!--        // 监听线绘制结束事件，获取坐标DRAWSTART-->
+<!--        // lineDraw.on('drawend', function(event){-->
+<!--        //     // event.feature 就是当前绘制完成的线的Feature-->
+<!--        //     // document.getElementById('areaData').innerHTML = JSON.stringify(event.feature.getGeometry().getCoordinates());-->
+<!--        // });-->
+<!--        map.addInteraction(lineDraw);-->
+<!--    }-->
+
+<!--    //开始绘制截面按钮-->
+<!--    let starDrawFBtn = document.getElementById('starDrawFBtn');-->
+<!--    starDrawFBtn.onclick = function() {-->
+<!--        map.removeInteraction(draw1);-->
+<!--        source1.clear();-->
+<!--        addInteractions(source1);-->
+
+<!--    };-->
+
+<!--    $('#endDraw').click(function () {-->
+<!--        clickflag=0;-->
+<!--        map.removeInteraction(lineDraw); //点击选择时候  取消绘图交互-->
+<!--        $("#lat2").css("background-color","white");-->
+<!--        $("#lng2").css("background-color","white");-->
+<!--        $("#lat1").css("background-color","white");-->
+<!--        $("#lng1").css("background-color","white");-->
+<!--    })-->
+<!--</script>-->
+<script>
+
+    function showQuery() {
+        document.getElementById('rightcard').style.display = 'block';
+    }
+
+    function hid(type) {
+        if (type==1){
+            document.getElementById('rightcard').style.display = 'none';
+        } else {
+            document.getElementById('draggable1').style.display = 'none';
+        }
+
+    }
+
+    $(function () {
+        $('.datepicker').datepicker({
+            todayHighlight: true,
+            orientation: "bottom left",
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            language: 'zh-CN',
+            startDate: '2017-17-01',
+            endDate: '2017-10-31'
+        });
+    });
+    $(function(){
+        $('#draggable1').draggabilly();
+    });
+
+</script>
+<script>
+    //ajax查询--按时间查询ajaxQuery
+    $(function () {
+        $('#ajaxQuery').click(function () {
+            let timein;
+            let timeout;
+            timein = $("#timein").val();
+            timeout = $("#timeout").val();
+            if (timein == "" || timeout == "") {
+                alert("请填写查询时间段");
+                return;
+            }
+            if (timeout <= timein) {
+                $("#titlemessage").text("结束时间不能小于开始时间！");
+                return;
+            }
+            let data = {};
+            data['timein'] = timein;
+            data['timeout'] = timeout;
+            sessionStorage.setItem("timein", timein);
+            sessionStorage.setItem("timeout", timeout);
+            $.ajax({
+                url: "/ajax/line",
+                type: "POST",
+                data: {
+                    timein: timein,
+                    timeout: timeout
+                },
+                dataType: "json",
+                beforeSend: function () {
+                    $("#ajaxQuery").text("查询中..");
+
+                    document.getElementById('card_body').style.display = 'none';
+                    document.getElementById('spinner').style.display = 'block';
+                },
+                success: function (list) {
+                    $("#ajaxQuery").text("船舶查询");
+                    //设置显示区域
+                    // echartslayer.clean()
+                    var echartslayer = new ol3Echarts(null, {
+                        forcedRerender: false, // 强制重绘，会调用 ECharts 的 clear() 方法清空图层
+                        forcedPrecomposeRerender: false, // 强制在 map 触发 precompose（准备渲染，未开始渲染）事件时进行 ECharts 图层的重绘
+                        hideOnZooming: false, // 在地图缩放时隐藏 ECharts 图层，这样在一些场景下可以提高性能。
+                        hideOnMoving: false, // 在地图移动时隐藏 ECharts 图层，这样在一些场景下可以提高性能。
+                        hideOnRotating: false, // 在地图旋转时隐藏 ECharts 图层，这样在一些场景下可以提高性能。
+                        opacity: 1,
+                    });
+                    echartslayer.appendTo(map);
+
+                            // 配置项
+                            var option = {
+                                visualMap: {
+                                    type: "piecewise",
+                                    left: 'right',
+                                    top: 'top',
+                                    min: 0,
+                                    max: 100,
+                                    splitNumber: 5,
+                                    maxOpen: true,
+                                    // color: ['#d94e5d','#eac736','#50a3ba']
+                                    color: ["rgb(203,239,15)", "rgb(73,15,239)","rgb(239,231,15)","rgb(15,217,239)","rgb(30,15,239)","rgb(15,174,239)","rgb(116,239,15)","rgb(239,15,58)","rgb(15,239,174)","rgb(239,102,15)","rgb(239,15,15)","rgb(15,44,239)","rgb(239,145,15)","rgb(30,239,15)","rgb(239,188,15)","rgb(159,239,15)","rgb(159,15,239)","rgb(15,239,44)","rgb(15,239,87)","rgb(15,239,217)","rgb(203,15,239)","rgb(239,15,188)","rgb(239,15,102)","rgb(239,58,15)","rgb(239,15,145)","rgb(116,15,239)","rgb(15,131,239)","rgb(73,239,15)","rgb(15,239,131)","rgb(15,87,239)","rgb(239,15,231)"]
+                                },
+                                series: [
+                                    {
+                                        type: 'lines',
+                                        polyline: true,
+                                        lineStyle: {
+                                            normal: {
+                                                opacity: 1,
+                                                width: 1
+                                            }
+                                        },
+                                        effect: {
+                                            constantSpeed: 20,
+                                            show: true,
+                                            trailLength: 0.1,
+                                            symbolSize: 2,
+                                            color: "white"
+                                        },
+                                        zlevel: 1
+                                    }
+                                ]
+                            };
+                            option.series[0].data = convertData(list);
+                            console.log(option.series[0].data)
+                            echartslayer.setChartOptions(option);
+
+                    // 处理数据
+                    function convertData (sourceData) {
+                        return [].concat.apply([], sourceData.map(function (busLine, index) {
+                            // var prevPoint = null;
+                            var points = [];
+                            var value = busLine.shift();
+                            for (var i = 0; i < busLine.length; i += 2) {
+                                var point = [busLine[i], busLine[i + 1]];
+                                // if (i > 0) {
+                                //     point = [
+                                //         prevPoint[0] + point[0],
+                                //         prevPoint[1] + point[1]
+                                //     ];
+                                // }
+                                // prevPoint = point;
+                                points.push([point[0] / 1e5, point[1] / 1e5]);
+                            }
+                            return {
+                                value: value,
+                                coords: points
+                            };
+                        }));
+                    }
+                    setTimeout(showSpinner, 2000);
+                },
+                error: function () {
+                    alert("error,请先填写所查询的时间段");
+                    $("#ajaxQuery").text("船舶查询");
+                }
+            })
+        })
+
+    })
+
+
+
+    function showSpinner() {
+        document.getElementById('card_body').style.display = 'block';
+        document.getElementById('spinner').style.display = 'none';
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
+    <title>条件查询</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.0.0/css/bootstrap.css}">
+    <script type="text/javascript" th:src="@{/webjars/jquery/3.3.1/jquery.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/4.0.0/js/bootstrap.js}"></script>
+    <link rel="stylesheet" th:href="@{/asserts/css/ol.css}" type="text/css">
+    <!--  <link rel="stylesheet" th:href="@{/asserts/css/style.css}">-->
+    <link rel="stylesheet" type="text/css" th:href="@{/asserts/css/bootstrap-datepicker3.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/asserts/css/component.css}"/>
+    <link rel="stylesheet" th:href="@{/asserts/css/naranja.min.css}">
+    <script th:src="@{/asserts/js/modernizr.custom.js}"></script>
+    <script th:src="@{/asserts/js/naranja.js}"></script>
+
+    <script type="text/javascript">
+        function narn (type) {
+            naranja()[type]({
+                title: '断面流量统计完成！',
+                text: '查看统计结果',
+                timeout: 'keep',
+                buttons: [{
+                    text: '查看结果',
+                    click: function (e) {
+                        naranja().success({
+                            title: 'Notification',
+                            text: 'Notification was accepted'
+                        })
+                    }
+                },{
+                    text: '重新绘制',
+                    click: function (e) {
+                        e.closeNotification()
+                    }
+                }]
+            })
+        }
+
+
+        function showQuery(){
+            document.getElementById('rightcard').style.display = 'block';
+        }
+        function hid(){
+            document.getElementById('rightcard').style.display = 'none';
+        }
+        $(function() {
+            $('#btnC').click(
+                function ShowResult() {
+                    if (localStorage.Trackdata) {
+                        var data = JSON.parse(localStorage.Trackdata);
+                        var html = "";
+                        for (var i = 0; i < data.length; ++i) {
+                            html += "<tr><td>" + data[i].mmsi + "</td><td>"
+                                + data[i].lng + "</td><td>" + data[i].lat
+                                + "</td><td>" + data[i].landSpeed
+                                + "</td><td>" + data[i].landCourse
+                                + "</td></tr>";
+                        }
+                        $('#content').html(html);
+                    } else {
+                        $.post("user.action", function(data) {
+                            var html = "";
+                            for (var i = 0; i < data.length; ++i) {
+                                html += "<tr><td>" + data[i].mmsi + "</td><td>"
+                                    + data[i].lng + "</td><td>"
+                                    + data[i].lat + "</td><td>"
+                                    + data[i].landSpeed + "</td><td>"
+                                    + data[i].landCourse + "</td></tr>";
+                            }
+                            $('#content').html(html);
+                            var Trackdata = JSON.stringify(data);
+                            localStorage.Trackdata = Trackdata;
+                        }, 'json');
+                    }
+                    $('#myModal').modal('show');
+
+                });
+
+        });
+
+    </script>
+    <style type="text/css">
+        body {
+            margin: 0;
+            border: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+
+        #leftcard{
+            position:relative;
+
+            margin-left: 35px;
+            margin-top: 64.5px;
+        }
+        #rightcard{
+            position:absolute;
+            right:0;
+            top:0;
+            width:20%;
+            height:53%;
+            filter:alpha(opacity=80);
+            float:right;
+            display: none;
+        }
+        .form-control{
+            width: 110%;
+        }
+        .flex-sm-fill text-sm-center nav-link active{
+            color: white;
+            margin-left: 5px;
+            font-size: x-large;
+            background-color: #56ff00a6;
+        }
+        .form-shadow{
+            box-shadow: 0px -2px 0px 0px #E4E7ED, /*上边阴影  红色*/
+            -3px 0px 0px 0px #E4E7ED, /*左边阴影  绿色*/
+            3px 0px 0px 0px #E4E7ED, /*右边阴影  蓝色*/
+            0px 2px 0px 0px #E4E7ED;
+        }
+    </style>
+</head>
+
+<body>
+<div style="padding-bottom: 15px;">
+    <ul id="cbp-tm-menu" class="cbp-tm-menu">
+        <li>
+            <nav class="nav nav-pills flex-column flex-sm-row">
+
+                <a class="flex-sm-fill text-sm-center nav-link active" th:action="@{/ships}"
+                   style="color: white;margin-left: 5px;font-size: x-large;background-color: #56ff00a6;">船位</a>
+                <a class="flex-sm-fill text-sm-center nav-link active" href="#" id="btn" onclick="showQuery()"
+                   style="color: white;margin-left: 5px;font-size: x-large;background-color: #56ff00a6;">轨迹</a>
+                <a class="flex-sm-fill text-sm-center nav-link active" href="#"
+                   style="color: white;margin-left: 5px;font-size: x-large;background-color: #56ff00a6;">气象流场可视化</a>
+            </nav>
+        </li>
+    </ul>
+
+</div>
+<script th:src="@{/asserts/js/cbpTooltipMenu.min.js}"></script>
+<script>
+    var menu = new cbpTooltipMenu(document.getElementById('cbp-tm-menu'));
+</script><!--
+<script th:src="@{/asserts/js/cbpTooltipMenu.min.js}"></script>-->
+<script th:src="@{/asserts/js/ol.js}"></script>
+<script th:src="@{/asserts/js/ol2.js}"></script>
+<div class="card" id="leftcard" style="border-color:#007bff;">
+
+    <div class="card-header">
+        <h3>航运学院.测试平台</h3>
+    </div>
+    <div class="card-body">
+
+        <div class="panel-body">
+            <div id="map"
+                 style="box-shadow: 0px -2px 0px 0px #94c8e0, /*上边阴影  红色*/
+              					  							 -3px 0px 0px 0px #94c8e0, /*左边阴影  绿色*/
+                											 3px 0px 0px 0px #94c8e0, /*右边阴影  蓝色*/
+                											 0px 2px 0px 0px #94c8e0;">
+
+            </div>
+        </div>
+
+    </div>
+    <div class="card" id="rightcard" style="height: auto;">
+
+        <div class="card-body" >
+            <div class="row">
+                <div class="col-8"><h5 class="card-title">查询框</h5></div>
+                <div class="col-4"><button type="button" class="close" aria-label="Close" style="float:right;" onclick="hid()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div class="basic-elements">
+
+
+                    <form th:action="@{/ships}" method="post" autocomplete="off">
+
+                        <div class="form-shadow">
+
+                            <!--垂直布局--><!--
+                                <label class="text-info">请选择查询时间段：</label>-->
+                            <span class="badge badge-light">请选择查询时间段：</span>
+                            <div class="container">
+                                <div class="row align-items-start">
+                                    <div class="col">
+                                        <div class="input-group date datepicker">
+                                            <input type="text" class="form-control" id="timein"
+                                                   name="timein" th:placeholder="开始时间">
+                                            <div class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th "></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="input-group date datepicker">
+                                            <input type="text" class="form-control" id="timeout"
+                                                   name="timeout" th:placeholder="结束时间">
+                                            <div class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th "></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="flag" id="flag"/>
+
+                            <div class="d-flex justify-content-center">
+                                <!-- <input class="btn btn-info m-b-10 m-l-5" value="船舶查询"
+                                    type="submit" name="sub" onclick="flow(1)"/> -->
+                                <button class="btn btn-primary" name="sec" style="width: 45%" th:text="船舶查询"  type="submit"></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+
+    let list =[[${dynamicAIS}]];
+
+    let selectClick; //交互select
+    let featureID = 0;
+
+    const features = new Array(list.length);
+    let feature;
+    const style = new ol.style.Style({
+        image: new ol.style.Icon({
+            // src: "asserts/bd3.png"
+            src: "asserts/img/poi1.png"
+        })
+
+    });
+    let i=0;
+    list.forEach(function(v){
+        feature = new ol.Feature({
+            geometry : new ol.geom.Point([
+                v.lng,v.lat
+            ])
+        });
+        feature.setStyle(style);
+        featureID =v.mmsi;
+        feature.setId(featureID);
+        features[i] = feature;
+        i=i+1;
+    });
+
+    let vectorSource = new ol.source.Vector({
+        features: features
+    });
+    const picvector = new ol.layer.Vector({
+        source: vectorSource
+    });
+
+    //高德地图层
+    const gaodeMapLayer = new ol.layer.Tile(
+        {
+            source: new ol.source.XYZ(
+                {
+                    url: 'http://webst0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}'
+                })
+        });
+
+    const layer = new ol.layer.Vector({
+        source: new ol.source.Vector()
+    });
+
+    // 实例化鼠标位置控件
+    let mousePositionControl = new ol.control.MousePosition({
+        coordinateFormat: ol.coordinate.toStringHDMS(), //坐标格式
+        projection: 'EPSG:4326', //地图投影坐标系
+        className: 'custom-mouse-position', //坐标信息显示样式
+        // 显示鼠标位置信息的目标容器
+        target: document.getElementById('mouse-position'),
+        undefinedHTML: '&nbsp' //未定义坐标的标记
+    });
+
+    const projection = ol.proj.get('EPSG:4326');
+    const tileUrl = "http://www.cjienc.com/arcgis/rest/services/cjinobeacon2/MapServer/tile/{z}/{y}/{x}?token=mmPANHmiGllbw-XOk9LEsgJiUKWfCHpa4igDEoOWin0Z9WR4-4rri_on8Vp2zVb8rdXrt78Y8ndbj485BRujdA..";
+    const tileUrl1 = "http://www.cjienc.com/arcgis/rest/services/basemap84/MapServer/tile/{z}/{y}/{x}?token=mmPANHmiGllbw-XOk9LEsgJiUKWfCHpa4igDEoOWin0Z9WR4-4rri_on8Vp2zVb8rdXrt78Y8ndbj485BRujdA..";
+    // var wuhan = fromLonLat([114, 30]);
+    //var tileUrl = "http://27.17.26.90/arcgis/rest/services/cjinobeacon2/MapServer/tile/{z}/{y}/{x}?token=ap5PH_XLDGrpHpQhGsnGR-wBDxvormuuqVCeDnxxYLQvw-zFx8oSXWxXraSTnhwW";
+    //var tileUrl1 = "http://27.17.26.90/arcgis/rest/services/basemap84/MapServer/tile/{z}/{y}/{x}?token=ap5PH_XLDGrpHpQhGsnGR-wBDxvormuuqVCeDnxxYLQvw-zFx8oSXWxXraSTnhwW";
+
+    const origin = [-400, 400];
+    const resolutions = [0.023794610058302804, 0.00951784402332112,
+        0.00475892201166056, 0.00237946100583028, 0.00118973050291514,
+        0.00059486525145757, 0.000297432625728785,
+        0.0001487163128643925, 0.00007435815643219625,
+        0.000037179078216098126, 0.00001859072883855198,
+        0.000009294174688773075, 0.000004647087344386537,
+        0.00000237946100583028,];
+
+    const fullExtent = [103.87588002846373, 18.45228966609097,
+        126.40686460052386, 42.24664597260153];
+
+    const tileGrid = new ol.tilegrid.TileGrid({
+        tileSize: 256,
+        origin: origin,
+        extent: fullExtent,
+        resolutions: resolutions
+    });
+    const tileArcGISXYZ = new ol.source.XYZ({
+        tileGrid: tileGrid,
+        projection: projection,
+        url: tileUrl,
+    });
+    const tileArcGISXYZ1 = new ol.source.XYZ({
+        tileGrid: tileGrid,
+        projection: projection,
+        url: tileUrl1,
+    });
+
+    const map = new ol.Map({
+        target: 'map',
+        layers: [gaodeMapLayer, new ol.layer.Tile({
+            source: tileArcGISXYZ1
+        }), new ol.layer.Tile({
+            source: tileArcGISXYZ
+        }), picvector
+
+        ],
+        view: new ol.View({
+            center: [122, 29],
+            resolutions: resolutions,
+            projection: projection,
+            extent: fullExtent
+        }),
+        controls: ol.control.defaults().extend([mousePositionControl])
+    });
+    map.getView().setZoom(1);
+    addSelect();
+    //添加交互----选择
+    let selectedFeatureID; //存放被选中feature的ID
+    function addSelect() {
+        selectClick = new ol.interaction.Select({
+            condition : ol.events.condition.click
+        });
+        map.addInteraction(selectClick);
+        selectClick.on('select', function(e) {
+            selectedFeatureID = e.selected[0].getId();
+            console.log(selectedFeatureID);
+            //
+            // $(function() {
+            //
+            //     list.forEach(function(v){
+            //         console.log(v);
+            //         if(selectedFeatureID==v.mmsi){
+            //             document.getElementById('imo').innerHTML = v.imo;
+            //             document.getElementById('shiptype').innerHTML = "<%=slist.get(i).getShipType()%>";
+            //             document.getElementById('shipstate').innerHTML = "<%=list.get(i).getShipState()%>";
+            //             document.getElementById('shipname').innerHTML = "<%=slist.get(i).getShipName()%>";
+            //             document.getElementById('shiplength').innerHTML = <%=slist.get(i).getShipLength()%>;
+            //             document.getElementById('shipwidth').innerHTML = <%=slist.get(i).getShipWidth()%>;
+            //             document.getElementById('water').innerHTML = <%=slist.get(i).getWaterDepth()%>;
+            //             document.getElementById('shipcourse').innerHTML = <%=list.get(i).getShipCourse()%>;
+            //             document.getElementById('h').innerHTML = <%=list.get(i).getLandCourse()%>;
+            //             document.getElementById('shipspeed').innerHTML = <%=list.get(i).getLandSpeed()%>;
+            //             document.getElementById('lng').innerHTML = <%=list.get(i).getLng()%>;
+            //             document.getElementById('lat').innerHTML = <%=list.get(i).getLat()%>;
+            //             document.getElementById('time').innerHTML = "<%=list.get(i).getTime()%>";
+            //             document.getElementById('destination').innerHTML = "<%=slist.get(i).getDestination()%>";
+            //         }
+            //     });
+            //
+
+            // <%for (int i = 0; i < slist.size(); i++) {%>
+            //         if(selectedFeatureID==<%=slist.get(i).getMmsi()%>){
+            //             document.getElementById('imo').innerHTML = <%=slist.get(i).getImo()%>;
+            //             document.getElementById('shiptype').innerHTML = "<%=slist.get(i).getShipType()%>";
+            //             document.getElementById('shipstate').innerHTML = "<%=list.get(i).getShipState()%>";
+            //             document.getElementById('shipname').innerHTML = "<%=slist.get(i).getShipName()%>";
+            //             document.getElementById('shiplength').innerHTML = <%=slist.get(i).getShipLength()%>;
+            //             document.getElementById('shipwidth').innerHTML = <%=slist.get(i).getShipWidth()%>;
+            //             document.getElementById('water').innerHTML = <%=slist.get(i).getWaterDepth()%>;
+            //             document.getElementById('shipcourse').innerHTML = <%=list.get(i).getShipCourse()%>;
+            //             document.getElementById('h').innerHTML = <%=list.get(i).getLandCourse()%>;
+            //             document.getElementById('shipspeed').innerHTML = <%=list.get(i).getLandSpeed()%>;
+            //             document.getElementById('lng').innerHTML = <%=list.get(i).getLng()%>;
+            //             document.getElementById('lat').innerHTML = <%=list.get(i).getLat()%>;
+            //             document.getElementById('time').innerHTML = "<%=list.get(i).getTime()%>";
+            //             document.getElementById('destination').innerHTML = "<%=slist.get(i).getDestination()%>";
+            //         }
+            //     <%}%>
+
+            //     document.getElementById('MMSI').innerHTML = selectedFeatureID;
+            //
+            //     $('#myModal').modal('show');
+            // });
+        });
+
+    }
+
+</script>
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4 class="modal-title" align="center">船舶基本信息</h4>
+
+                <br />
+                <form>
+                    <div class="row">
+                        <div class="col-md-6">
+
+
+
+                            <div>
+                                <label>MMSI:</label>
+                                <label id="MMSI"></label>
+
+                            </div>
+                            <div>
+                                <label>船名:</label>
+                                <label id="shipname"></label>
+
+                            </div>
+                            <div>
+                                <label>IMO:</label>
+                                <label id="imo"></label>
+
+                            </div>
+                            <div>
+                                <label>类型:</label>
+                                <label id="shiptype"></label>
+
+                            </div>
+                            <div>
+                                <label>状态:</label>
+                                <label id="shipstate"></label>
+
+                            </div>
+                            <div>
+                                <label>船长:</label>
+                                <label id="shiplength"></label>
+
+                            </div>
+                            <div>
+                                <label>船宽:</label>
+                                <label id="shipwidth"></label>
+
+                            </div>
+                            <div>
+                                <label>吃水:</label>
+                                <label id="water"></label>
+
+                            </div>
+
+                        </div>
+                        <div class="col-md-6">
+                            <div>
+                                <label>船首向:</label>
+                                <label id="shipcourse"></label>
+
+                            </div>
+                            <div>
+                                <label>航迹向:</label>
+                                <label id="h"></label>
+
+                            </div>
+                            <div>
+                                <label>船速:</label>
+                                <label id="shipspeed"></label>
+
+                            </div>
+                            <div>
+                                <label>经度:</label>
+                                <label id="lng"></label>
+
+                            </div>
+                            <div>
+                                <label>纬度:</label>
+                                <label id="lat"></label>
+
+                            </div>
+                            <div>
+                                <label>目的地:</label>
+                                <label id="destination"></label>
+
+                            </div>
+                            <div>
+                                <label>到达时间:</label>
+                                <label id="time"></label>
+
+                            </div>
+                            <div>
+                                <label>更新时间:</label>
+                                <label id="utime"></label>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer"></div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+
+</body>
+</html>

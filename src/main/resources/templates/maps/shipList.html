@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <!--    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">-->
+    <title>船舶查询</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.0.0/css/bootstrap.css}">
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
+                                                                                         rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/asserts/css/mapcommen.css}">
+    <link rel="stylesheet" th:href="@{/asserts/css/naranja.min.css}">
+    <link href="https://cdn.bootcdn.net/ajax/libs/openlayers/4.6.5/ol.css" rel="stylesheet">
+</head>
+<body>
+<ul class="nav justify-content-end" style="background-color: #47a3da;">
+    <li class="nav-item" style="background-color: #b3eff599;color: dimgrey">
+        <a class="nav-link" th:onclick="showQuery()">船位</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" style="color: whitesmoke" th:href="@{/tracks}">轨迹</a>
+    </li>
+<!--    <li class="nav-item">-->
+<!--        <a class="nav-link" th:href="@{/flowGL}" style="color: whitesmoke">流场图</a>-->
+<!--    </li>-->
+</ul>
+
+<div id="leftcard">
+    <div id="map"></div>
+    <div class="card" id="rightcard">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-8"><h5 class="card-title">查询框</h5></div>
+                <div class="col-4">
+                    <button type="button" class="close" aria-label="Close" style="float:right;" onclick="hid()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div class="basic-elements">
+
+                    <form autocomplete="off">
+                        <div class="form-shadow">
+
+                            <!--垂直布局-->
+                            <span class="badge badge-light" id="titlemessage">请选择查询时间段：<br>(输入 2017-02-06 到 2017-02-07)</span>
+                            <div class="container">
+                                <div class="row align-items-start">
+                                    <div class="col">
+                                        <div class="input-group date datepicker">
+                                            <input type="text" class="form-control" id="timein"
+                                                   name="timein" th:placeholder="开始时间">
+                                            <div class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th "></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="input-group date datepicker">
+                                            <input type="text" class="form-control" id="timeout"
+                                                   name="timeout" th:placeholder="结束时间">
+                                            <div class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th "></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center">
+
+                                <a id="ajaxQuery" class="btn btn-primary" style="width: 45%;color: white;"
+                                   th:text="船舶查询"></a>
+
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+</div>
+<!--弹出模态框，显示统计结果-->
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4 class="modal-title" align="center">船舶基本信息</h4>
+                <br/>
+                <form>
+                    <table class="table">
+                        <tr class="tabletitle">
+                            <td class="table-item" align="center">
+                                <h4>船名</h4>
+                            </td>
+                            <td class="table-item" align="center">
+                                <h4>船长</h4>
+                            </td>
+                            <td class="table-item" align="center">
+                                <h4>吃水</h4>
+                            </td>
+                            <td class="table-item" align="center">
+                                <h4>船型</h4>
+                            </td>
+                            <td class="table-item" align="center">
+                                <h4>船速</h4>
+                            </td>
+                            <td class="table-item" align="center">
+                                <h4>目的地</h4>
+                            </td>
+                        </tr>
+                        <tbody id="content">
+
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+            <div class="modal-footer"></div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<script th:src="@{/webjars/jquery/3.3.1/jquery.js}"></script>
+<!--<script th:src="@{/asserts/js/ol.js}"></script>-->
+<!--<script th:src="@{/asserts/js/ol2.js}"></script>-->
+<script src="https://cdn.bootcdn.net/ajax/libs/openlayers/4.6.5/ol.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ol3-echarts/dist/ol3Echarts.js"></script>
+<script th:src="@{/webjars/bootstrap/4.0.0/js/bootstrap.js}"></script>
+<script th:src="@{/asserts/js/naranja.js}"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.zh-CN.min.js"></script>
+
+<script th:src="@{/asserts/js/shipList.js}"></script>
+
+
+</body>
+</html>

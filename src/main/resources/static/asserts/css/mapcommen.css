@@ -1,0 +1,126 @@
+html, body {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+#leftcard {
+    position: relative;
+    margin: auto;
+    height: 100%;
+}
+
+#rightcard {
+    position: absolute;
+    right: 5px;
+    top: 7%;
+    width: 20%;
+    height: auto;
+    float: right;
+    display: block;
+}
+
+#map{
+    /*box-shadow: 0px -2px 0px 0px #94c8e0, !*上边阴影  红色*!*/
+    /*-3px 0px 0px 0px #94c8e0, !*左边阴影  绿色*!*/
+    /*3px 0px 0px 0px #94c8e0, !*右边阴影  蓝色*!*/
+    /*0px 2px 0px 0px #94c8e0;*/
+    width: 100%;
+    height: 95%;
+    /*max-height: 90%;*/
+    margin: auto;
+}
+
+
+#search_input1{
+    width: 20%;
+    background-color: red;
+}
+
+.form-control {
+    width: 100%;
+}
+
+.flex-sm-fill text-sm-center nav-link active {
+    color: white;
+    margin-left: 5px;
+    font-size: x-large;
+    background-color: #56ff00a6;
+}
+
+.form-shadow {
+    box-shadow: 0px -2px 0px 0px #E4E7ED, /*上边阴影  红色*/ -3px 0px 0px 0px #E4E7ED, /*左边阴影  绿色*/ 3px 0px 0px 0px #E4E7ED, /*右边阴影  蓝色*/ 0px 2px 0px 0px #E4E7ED;
+}
+.spinner {
+    margin: 100px auto;
+    width: 50px;
+    height: 60px;
+    text-align: center;
+    font-size: 10px;
+}
+
+.spinner > div {
+    background-color: #67CF22;
+    height: 100%;
+    width: 6px;
+    display: inline-block;
+    -webkit-animation: stretchdelay 1.2s infinite ease-in-out;
+    animation: stretchdelay 1.2s infinite ease-in-out;
+}
+
+.spinner .rect2 {
+    -webkit-animation-delay: -1.1s;
+    animation-delay: -1.1s;
+}
+
+.spinner .rect3 {
+    -webkit-animation-delay: -1.0s;
+    animation-delay: -1.0s;
+}
+
+.spinner .rect4 {
+    -webkit-animation-delay: -0.9s;
+    animation-delay: -0.9s;
+}
+
+.spinner .rect5 {
+    -webkit-animation-delay: -0.8s;
+    animation-delay: -0.8s;
+}
+
+@-webkit-keyframes stretchdelay {
+    0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
+    20% { -webkit-transform: scaleY(1.0) }
+}
+
+@keyframes stretchdelay {
+    0%, 40%, 100% {
+        transform: scaleY(0.4);
+        -webkit-transform: scaleY(0.4);
+    }  20% {
+           transform: scaleY(1.0);
+           -webkit-transform: scaleY(1.0);
+       }
+}
+.box {
+    position: absolute;
+    background: #fa0;
+    border-radius: 10px;
+    z-index: 10;
+    left: 5px;
+    top: 5%;
+    float: left;
+    margin:0 auto;
+    opacity: 0.9;
+}
+
+.box:hover{cursor: move;}
+.box.is-pointer-down {
+    background: #09F;
+}
+.box.is-dragging { opacity: 0.9; }
+.box-1{
+    width:  auto;
+    height: auto;
+    display: none;
+}
+
